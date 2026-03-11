@@ -10,6 +10,8 @@ interface LineItem {
   quantity: number;
   partsCost: number;
   labourCost: number;
+  labourHours: number;
+  labourUnitPrice: number;
   comment: string;
 }
 
@@ -21,9 +23,13 @@ interface WorkOrder {
 }
 
 const REGIONS = ['Denmark', 'Sweden', 'Norway', 'Finland', 'Germany', 'France', 'United Kingdom', 'Italy', 'Spain', 'Netherlands', 'Belgium', 'Switzerland', 'Austria', 'Poland'];
-const CURRENCIES = ['DKK','USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD'];
+const CURRENCIES = ['DKK','USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'SEK'];
 const TRAILER_TYPES = ['Dry Van', 'Refrigerated', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker'];
 const LINE_ITEM_CATEGORIES = ['Brakes', 'Tyres', 'Lights', 'Suspension', 'Electrical', 'Chassis', 'Body', 'Other'];
+
+const INITIAL_DRAFT_NUMBER = Math.floor(Math.random() * 10000);
+
+const generateLineItemId = () => `orderline-${crypto.randomUUID()}`;
 
 export default function App() {
   const [workOrder, setWorkOrder] = useState<WorkOrder>({
@@ -32,13 +38,15 @@ export default function App() {
     trailerType: '',
     lineItems: [
       {
-        id: crypto.randomUUID(),
+        id: generateLineItemId(),
         category: '',
         costCode: '',
         netAmount: 0,
         quantity: 1,
         partsCost: 0,
         labourCost: 0,
+        labourHours: 0,
+        labourUnitPrice: 0,
         comment: '',
       },
     ],
@@ -52,13 +60,15 @@ export default function App() {
       lineItems: [
         ...prev.lineItems,
         {
-          id: crypto.randomUUID(),
+          id: generateLineItemId(),
           category: '',
           costCode: '',
           netAmount: 0,
           quantity: 1,
           partsCost: 0,
           labourCost: 0,
+          labourHours: 0,
+          labourUnitPrice: 0,
           comment: '',
         },
       ],
@@ -79,8 +89,14 @@ export default function App() {
       lineItems: prev.lineItems.map((item) => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
-          // Automatically calculate net amount if parts or labour cost changes
-          if (field === 'partsCost' || field === 'labourCost' || field === 'quantity') {
+          
+          // Calculate labour cost if hours or unit price changes
+          if (field === 'labourHours' || field === 'labourUnitPrice') {
+            updatedItem.labourCost = Number(updatedItem.labourHours) * Number(updatedItem.labourUnitPrice);
+          }
+
+          // Automatically calculate net amount if parts, labour cost, or quantity changes
+          if (field === 'partsCost' || field === 'labourCost' || field === 'quantity' || field === 'labourHours' || field === 'labourUnitPrice') {
             updatedItem.netAmount = (Number(updatedItem.partsCost) + Number(updatedItem.labourCost)) * Number(updatedItem.quantity);
           }
           return updatedItem;
@@ -92,7 +108,7 @@ export default function App() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting Work Order:', workOrder);
+    console.log('Form Submitted Locally');
     setIsSubmitted(true);
     setTimeout(() => setIsSubmitted(false), 5000);
   };
@@ -111,7 +127,7 @@ export default function App() {
             <h1 className="text-xl font-semibold tracking-tight text-slate-800">WorkOrder Pro</h1>
           </div>
           <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
-            <span>Draft #{Math.floor(Math.random() * 10000)}</span>
+            <span>Draft #{INITIAL_DRAFT_NUMBER}</span>
           </div>
         </div>
       </header>
@@ -132,6 +148,7 @@ export default function App() {
                 <div className="relative">
                   <select
                     required
+                    data-field="region"
                     value={workOrder.region}
                     onChange={(e) => setWorkOrder({ ...workOrder, region: e.target.value })}
                     className="w-full h-11 pl-4 pr-10 bg-white border border-slate-200 rounded-xl appearance-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -150,6 +167,7 @@ export default function App() {
                 <div className="relative">
                   <select
                     required
+                    data-field="currency"
                     value={workOrder.currency}
                     onChange={(e) => setWorkOrder({ ...workOrder, currency: e.target.value })}
                     className="w-full h-11 pl-4 pr-10 bg-white border border-slate-200 rounded-xl appearance-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -167,6 +185,7 @@ export default function App() {
                 <div className="relative">
                   <select
                     required
+                    data-field="trailerType"
                     value={workOrder.trailerType}
                     onChange={(e) => setWorkOrder({ ...workOrder, trailerType: e.target.value })}
                     className="w-full h-11 pl-4 pr-10 bg-white border border-slate-200 rounded-xl appearance-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
@@ -206,6 +225,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   key={item.id}
+                  data-line-item={item.id}
                   className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group"
                 >
                   <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
@@ -225,6 +245,7 @@ export default function App() {
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</label>
                         <select
                           required
+                          data-item-field="category"
                           value={item.category}
                           onChange={(e) => updateLineItem(item.id, 'category', e.target.value)}
                           className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
@@ -241,6 +262,7 @@ export default function App() {
                         <input
                           required
                           type="text"
+                          data-item-field="costCode"
                           placeholder="e.g. BRK-001"
                           value={item.costCode}
                           onChange={(e) => updateLineItem(item.id, 'costCode', e.target.value)}
@@ -254,6 +276,7 @@ export default function App() {
                           required
                           type="number"
                           min="1"
+                          data-item-field="quantity"
                           value={item.quantity}
                           onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 0)}
                           className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
@@ -268,6 +291,7 @@ export default function App() {
                             required
                             type="text"
                             inputMode="decimal"
+                            data-item-field="partsCost"
                             placeholder="0.00"
                             value={item.partsCost === 0 ? '' : item.partsCost}
                             onChange={(e) => {
@@ -280,18 +304,34 @@ export default function App() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Labour Cost</label>
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Labour Hours</label>
+                        <input
+                          required
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          data-item-field="labourHours"
+                          placeholder="0.0"
+                          value={item.labourHours === 0 ? '' : item.labourHours}
+                          onChange={(e) => updateLineItem(item.id, 'labourHours', parseFloat(e.target.value) || 0)}
+                          className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Labour Unit Price</label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
                           <input
                             required
                             type="text"
                             inputMode="decimal"
+                            data-item-field="labourUnitPrice"
                             placeholder="0.00"
-                            value={item.labourCost === 0 ? '' : item.labourCost}
+                            value={item.labourUnitPrice === 0 ? '' : item.labourUnitPrice}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^0-9.]/g, '');
-                              updateLineItem(item.id, 'labourCost', val === '' ? 0 : parseFloat(val) || 0);
+                              updateLineItem(item.id, 'labourUnitPrice', val === '' ? 0 : parseFloat(val) || 0);
                             }}
                             className="w-full h-10 pl-7 pr-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
                           />
@@ -299,8 +339,26 @@ export default function App() {
                       </div>
 
                       <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Labour Cost</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
+                          <input
+                            readOnly
+                            type="text"
+                            data-item-field="labourCost"
+                            placeholder="0.00"
+                            value={item.labourCost.toFixed(2)}
+                            className="w-full h-10 pl-7 pr-3 bg-slate-100 border border-slate-200 rounded-lg outline-none text-sm font-medium text-slate-600 cursor-not-allowed"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Net Amount</label>
-                        <div className="w-full h-10 px-3 bg-slate-100 border border-slate-200 rounded-lg flex items-center text-sm font-semibold text-slate-600">
+                        <div 
+                          data-item-field="netAmount"
+                          className="w-full h-10 px-3 bg-slate-100 border border-slate-200 rounded-lg flex items-center text-sm font-semibold text-slate-600"
+                        >
                           {workOrder.currency} {item.netAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                       </div>
@@ -309,6 +367,7 @@ export default function App() {
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Comment / Description</label>
                         <input
                           type="text"
+                          data-item-field="comment"
                           placeholder="Additional details..."
                           value={item.comment}
                           onChange={(e) => updateLineItem(item.id, 'comment', e.target.value)}
@@ -345,7 +404,7 @@ export default function App() {
               </button>
               <button
                 type="submit"
-                className="flex-1 md:flex-none px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-indigo-300 transition-all active:scale-[0.98]"
+                className="submit flex-1 md:flex-none px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-indigo-300 transition-all active:scale-[0.98]"
               >
                 Submit Work Order
               </button>
