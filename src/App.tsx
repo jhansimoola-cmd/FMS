@@ -293,10 +293,10 @@ export default function App() {
                             inputMode="decimal"
                             data-item-field="partsCost"
                             placeholder="0.00"
-                            value={item.partsCost === 0 ? '' : item.partsCost}
+                             value={item.partsCost === 0 ? '' : item.partsCost.toString()}
                             onChange={(e) => {
-                              const val = e.target.value.replace(/[^0-9.]/g, '');
-                              updateLineItem(item.id, 'partsCost', val === '' ? 0 : parseFloat(val) || 0);
+                              const val = e.target.value;
+                              updateLineItem(item.id, 'partsCost', val);
                             }}
                             className="w-full h-10 pl-7 pr-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
                           />
