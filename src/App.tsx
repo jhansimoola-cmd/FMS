@@ -42,7 +42,7 @@ export default function App() {
         category: '',
         costCode: '',
         netAmount: 0,
-        quantity: 1,
+        quantity: 0,
         partsCost: 0,
         labourCost: 0,
         labourHours: 0,
@@ -64,7 +64,7 @@ export default function App() {
           category: '',
           costCode: '',
           netAmount: 0,
-          quantity: 1,
+          quantity: 0,
           partsCost: 0,
           labourCost: 0,
           labourHours: 0,
@@ -95,9 +95,9 @@ export default function App() {
             updatedItem.labourCost = Number(updatedItem.labourHours) * Number(updatedItem.labourUnitPrice);
           }
 
-          // Automatically calculate net amount if parts, labour cost, or quantity changes
+          // Automatically calculate net amount if parts, labour cost
           if (field === 'partsCost' || field === 'labourCost' || field === 'quantity' || field === 'labourHours' || field === 'labourUnitPrice') {
-            updatedItem.netAmount = (Number(updatedItem.partsCost) + Number(updatedItem.labourCost)) * Number(updatedItem.quantity);
+            updatedItem.netAmount = (Number(updatedItem.partsCost) + Number(updatedItem.labourCost));
           }
           return updatedItem;
         }
