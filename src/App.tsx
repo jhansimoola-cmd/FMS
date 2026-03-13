@@ -275,7 +275,7 @@ export default function App() {
                         <input
                           required
                           type="number"
-                          min="1"
+                          min="0"
                           data-item-field="quantity"
                           value={item.quantity}
                           onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 0)}
