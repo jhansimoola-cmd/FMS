@@ -24,8 +24,8 @@ interface WorkOrder {
 
 const REGIONS = ['Denmark', 'Sweden', 'Norway', 'Finland', 'Germany', 'France', 'United Kingdom', 'Italy', 'Spain', 'Netherlands', 'Belgium', 'Switzerland', 'Austria', 'Poland'];
 const CURRENCIES = ['DKK','USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'SEK'];
-const TRAILER_TYPES = ['Dry Van', 'Curtain','Refrigerated', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker'];
-const LINE_ITEM_CATEGORIES = ['Brakes','Mounting Telematics', 'Tyres','Lights', 'Suspension', 'Electrical', 'Chassis', 'Body', 'Other'];
+const TRAILER_TYPES = ['Dry Van', 'box','Curtain','Refrigerated', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker'];
+const LINE_ITEM_CATEGORIES = ['Brakes','Roadside Assistance Fee','Air leak','Mounting Telematics', 'Tyres','Lights', 'Suspension', 'Electrical', 'Chassis', 'Body', 'Other'];
 
 const INITIAL_DRAFT_NUMBER = Math.floor(Math.random() * 10000);
 
