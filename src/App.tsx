@@ -276,6 +276,7 @@ export default function App() {
                           required
                           type="number"
                           min="0"
+                          placeholder="0"
                           data-item-field="quantity"
                          value={item.quantity === 0 ? '' : item.quantity}
                           onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 0)}
