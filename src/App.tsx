@@ -277,7 +277,7 @@ export default function App() {
                           type="number"
                           min="0"
                           data-item-field="quantity"
-                          value={item.quantity}
+                         value={item.quantity === 0 ? '' : item.quantity}
                           onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 0)}
                           className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
                         />
